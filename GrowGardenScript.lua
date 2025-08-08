@@ -1,5 +1,12 @@
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
-local Window = OrionLib:MakeWindow({Name = "Grow Garden Helper V1", HidePremium = false, SaveConfig = true})
+local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
+wait(0.5) -- Add small delay to ensure library loads
+local Window = OrionLib:MakeWindow({
+    Name = "Grow Garden Helper V1",
+    HidePremium = false,
+    SaveConfig = true,
+    IntroEnabled = false,
+    IntroText = "Grow Garden Helper"
+})
 
 -- Main Tab
 local MainTab = Window:MakeTab({
@@ -26,7 +33,7 @@ PlantSection:AddToggle({
                         waterTool.Parent = game.Players.LocalPlayer.Character
                         local args = {
                             [1] = plant
-                        }
+                        }   
                         game:GetService("ReplicatedStorage").WaterPlant:FireServer(unpack(args))
                     end
                 end
