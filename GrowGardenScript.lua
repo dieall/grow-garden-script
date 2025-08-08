@@ -1,12 +1,13 @@
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
-wait(0.5) -- Add small delay to ensure library loads
-local Window = OrionLib:MakeWindow({
-    Name = "Grow Garden Helper V1",
-    HidePremium = false,
-    SaveConfig = true,
-    IntroEnabled = false,
-    IntroText = "Grow Garden Helper"
-})
+-- Speed Hub X | Grow Garden
+
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("Speed Hub X | Grow Garden", "Ocean")
+
+-- Values
+_G.autoFarm = true
+_G.autoWater = true
+_G.autoHarvest = true
+_G.autoCollect = true
 
 -- Main Tab
 local MainTab = Window:MakeTab({
@@ -159,10 +160,76 @@ MiscTab:AddButton({
     end
 })
 
--- Initialize
-OrionLib:Init()
+-- Main
+local Main = Window:NewTab("Main")
+local MainSection = Main:NewSection("Main Features")
 
--- Anti-AFK
+MainSection:NewToggle("Auto Farm", "Auto farms for you", function(state)
+    _G.autoFarm = state
+    while _G.autoFarm and wait() do
+        -- Auto Plant
+        local plot = workspace:FindFirstChild("EmptyPlot")
+        if plot then
+            local args = {[1] = plot, [2] = "Basic Seed"}
+            game:GetService("ReplicatedStorage").PlantSeed:FireServer(unpack(args))
+        end
+        
+        -- Auto Water
+        for _, plant in pairs(workspace:GetDescendants()) do
+            if plant:IsA("Model") and plant.Name:find("Plant") then
+                local args = {[1] = plant}
+                game:GetService("ReplicatedStorage").WaterPlant:FireServer(unpack(args))
+            end
+        end
+        
+        -- Auto Harvest
+        for _, plant in pairs(workspace:GetDescendants()) do
+            if plant:IsA("Model") and plant.Name:find("Grown") then
+                local args = {[1] = plant}
+                game:GetService("ReplicatedStorage").HarvestPlant:FireServer(unpack(args))
+            end
+        end
+        
+        -- Auto Collect
+        for _, drop in pairs(workspace:GetDescendants()) do
+            if drop:IsA("Model") and drop.Name:find("Drop") then
+                game:GetService("ReplicatedStorage").CollectDrop:FireServer(drop)
+            end
+        end
+    end
+end)
+
+MainSection:NewButton("Teleport to Shop", "Teleports you to the shop", function()
+    local shop = workspace:FindFirstChild("Shop")
+    if shop then
+        game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = shop.CFrame
+    end
+end)
+
+MainSection:NewButton("Auto Buy Seeds", "Buys basic seeds", function()
+    local args = {[1] = "Basic Seed", [2] = 1}
+    game:GetService("ReplicatedStorage").PurchaseItem:FireServer(unpack(args))
+end)
+
+-- Player
+local Player = Window:NewTab("Player")
+local PlayerSection = Player:NewSection("Player Settings")
+
+PlayerSection:NewSlider("WalkSpeed", "Changes your walkspeed", 500, 16, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = v
+end)
+
+PlayerSection:NewSlider("JumpPower", "Changes your jumppower", 500, 50, function(v)
+    game.Players.LocalPlayer.Character.Humanoid.JumpPower = v
+end)
+
+-- Credits
+local Credits = Window:NewTab("Credits")
+local CreditsSection = Credits:NewSection("Credits")
+CreditsSection:NewLabel("Modified by dieall")
+CreditsSection:NewLabel("UI Library: Kavo UI")
+
+-- Anti AFK
 local VirtualUser = game:GetService('VirtualUser')
 game:GetService('Players').LocalPlayer.Idled:Connect(function()
     VirtualUser:CaptureController()
